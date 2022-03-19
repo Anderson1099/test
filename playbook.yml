@@ -1,0 +1,43 @@
+---
+- hosts: 172.25.128.201
+  tasks:
+  - name: Mise en place du depot
+    yum:
+     name: epel-release
+     state: present
+  - name: Installation du serveur Apache,PHP et maria-db
+    yum:
+     name: "{{ item }}"
+     state: present
+    loop:
+      - httpd
+      - php
+      - mariadb-server
+      - ansible
+  - name: Arret du service nginx
+    systemd:
+     name: nginx
+     state: stopped
+  - name: Démarrage du serveur apache
+    systemd:
+     name: "{{ item }}"
+     state: started
+    loop:
+      - httpd
+      - mariadb
+      - php
+      - ansible
+  - name: SUppression du fichier index.html
+    file:
+     path: /var/www/html/index.html
+     state: absent
+  - name: Copie des fichoers php
+    copy:
+     src: "{{ item }}"
+     dest: /var/www/html/
+    loop:
+     - index.php
+     - create_db.php
+     - create_table.php
+     - getting_data.php
+     - insert_data.php
